@@ -1,0 +1,64 @@
+# TrackME - Git Ignore File
+
+# ===========================================
+# Sensible Daten (NIEMALS committen!)
+# ===========================================
+trackme/config/database.php
+*.env
+.env.local
+
+# ===========================================
+# Logs & Temporary Files
+# ===========================================
+*.log
+trackme/logs/
+trackme/tmp/
+trackme/temp/
+trackme/cache/
+
+# ===========================================
+# Backups
+# ===========================================
+*.sql
+backup*.sql
+*.backup
+
+# ===========================================
+# OS Files
+# ===========================================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# ===========================================
+# IDE / Editor
+# ===========================================
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.settings/
+
+# ===========================================
+# Composer (falls später genutzt)
+# ===========================================
+/vendor/
+composer.lock
+
+# ===========================================
+# Node Modules (falls später genutzt)
+# ===========================================
+node_modules/
+package-lock.json
+yarn.lock
+
+# ===========================================
+# Test Files (Optional behalten)
+# ===========================================
+test-db.php

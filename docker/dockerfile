@@ -1,0 +1,10 @@
+FROM php:8.3-apache
+
+# MySQL/MariaDB PDO Extension installieren
+RUN docker-php-ext-install pdo pdo_mysql
+
+# Apache mod_rewrite aktivieren (für später)
+RUN a2enmod rewrite
+
+# Workdir setzen
+WORKDIR /var/www/html

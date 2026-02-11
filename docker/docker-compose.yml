@@ -1,0 +1,27 @@
+# docker-compose.yml
+services:
+  web:
+#    image: php:8.3-apache
+    #image: my-image
+    build: .
+    ports:
+      - "8080:80"
+    volumes:
+      - "/Users/ac135386/Projects/Allergy WEB/trackme:/var/www/html"
+    depends_on:
+      - db
+  
+  db:
+    image: mariadb:11.2
+    environment:
+      MYSQL_DATABASE: trackme
+      MYSQL_ROOT_PASSWORD: dev123
+    ports:
+      - "3306:3306"
+  
+  phpmyadmin:
+    image: phpmyadmin:latest
+    ports:
+      - "8081:80"
+    environment:
+      PMA_HOST: db
