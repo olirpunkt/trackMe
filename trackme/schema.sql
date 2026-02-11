@@ -232,6 +232,16 @@ INSERT INTO `symptom_logs` (`daily_entry_id`, `symptom_type_id`, `severity`) VAL
 INSERT INTO `medication_logs` (`daily_entry_id`, `medication_id`, `taken`) VALUES
 (1, 1, 1);  -- Cetirizin genommen
 
+-- User-Tabelle für Login-System
+CREATE TABLE IF NOT EXISTS `users` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(50) NOT NULL,
+  `password_hash` varchar(255) NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `username` (`username`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 COMMIT;
 
 -- ============================================
