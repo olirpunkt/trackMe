@@ -7,6 +7,7 @@ session_start();
 
 // Lade Konfiguration
 require_once __DIR__ . '/../config/database.php';
+require_once __DIR__ . '/../config/auth.php';  // ← NEU!
 
 // Teste DB-Verbindung beim ersten Load
 try {
@@ -17,6 +18,43 @@ try {
 
 // Routing: Hole Page-Parameter
 $page = $_GET['page'] ?? 'dashboard';
+
+// ============================================
+// LOGOUT HANDLING
+// ============================================
+if ($page === 'logout') {
+    logout();
+    redirect('login');
+}
+// ============================================
+// LOGIN HANDLING (vor HTML Output!)
+// ============================================
+if ($page === 'login' && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login'])) {
+    
+    // CSRF-Token prüfen
+    if (!isset($_POST['csrf_token']) || !validateCSRFToken($_POST['csrf_token'])) {
+        $_SESSION['login_error'] = 'Ungültige Anfrage. Bitte versuche es erneut.';
+    } else {
+        // Login-Versuch
+        $result = attemptLogin($_POST['username'] ?? '', $_POST['password'] ?? '');
+        
+        if ($result['success']) {
+            // Login erfolgreich - Redirect zum Dashboard
+            redirect('dashboard');
+        } else {
+            $_SESSION['login_error'] = $result['message'];
+        }
+    }
+}
+
+// ============================================
+// AUTH CHECK
+// ============================================
+// Login-Seite ist öffentlich zugänglich
+if ($page !== 'login') {
+    // Alle anderen Seiten: Login erforderlich
+    requireLogin();
+}
 
 // ============================================
 // EXPORT HANDLING (VOR HTML OUTPUT!)
@@ -117,7 +155,7 @@ if ($page === 'export' && isset($_GET['action'])) {
 }
 
 // Erlaubte Seiten (Whitelist)
-$allowedPages = ['dashboard', 'history', 'settings', 'export'];
+$allowedPages = ['dashboard', 'history', 'settings', 'export', 'login'];
 if (!in_array($page, $allowedPages)) {
     $page = 'dashboard';
 }
@@ -128,6 +166,7 @@ $pageTitles = [
     'history' => 'Verlauf',
     'settings' => 'Einstellungen',
     'export' => 'Export',
+    'login' => 'Login',
 ];
 
 $pageTitle = $pageTitles[$page];
@@ -140,10 +179,11 @@ $pageTitle = $pageTitles[$page];
     <title><?= e($pageTitle) ?> - TrackME</title>
     
     <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- <script src="https://cdn.tailwindcss.com"></script> -->
+    <link href="css/tailwind.css" rel="stylesheet">
     
     <!-- Alpine.js -->
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <!-- <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script> -->
 </head>
 <body class="bg-gray-50 min-h-screen">
     
@@ -181,15 +221,27 @@ $pageTitle = $pageTitles[$page];
                     </div>
                 </div>
                 
-                <!-- Datum-Anzeige -->
-                <div class="flex items-center">
-                    <span class="text-sm text-gray-500">
-                        <?php
-                        $weekdays = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'];
-                        $months = ['', 'Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
-                        echo $weekdays[date('w')] . ', ' . date('d') . '. ' . $months[date('n')] . ' ' . date('Y');
-                        ?>
-                    </span>
+<!-- User Info / Logout -->
+                <div class="flex items-center space-x-4">
+                    <?php if (isLoggedIn()): ?>
+                        <!-- Eingeloggt: Zeige Username + Logout -->
+                        <span class="text-sm text-gray-700">
+                            👤 <?= e(getCurrentUsername()) ?>
+                        </span>
+                        <a href="?page=logout" 
+                           class="text-sm text-gray-500 hover:text-gray-700 transition">
+                            Logout
+                        </a>
+                    <?php else: ?>
+                        <!-- Nicht eingeloggt: Zeige Datum -->
+                        <span class="text-sm text-gray-500">
+                            <?php
+                            $weekdays = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'];
+                            $months = ['', 'Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
+                            echo $weekdays[date('w')] . ', ' . date('d') . '. ' . $months[date('n')] . ' ' . date('Y');
+                            ?>
+                        </span>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
